@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5056" systemVersion="13C64" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5056" systemVersion="13C1021" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5056"/>
         <plugIn identifier="com.apple.MapKitIBPlugin" version="5056"/>
-        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
@@ -15,8 +14,10 @@
         <customObject id="-3" userLabel="Application"/>
         <customObject id="Voe-Tx-rLC" customClass="AppDelegate">
             <connections>
-                <outlet property="columns" destination="JMA-KI-1sf" id="NTH-oK-gAw"/>
+                <outlet property="firstBox" destination="IfQ-7M-ZAQ" id="Pci-gY-GbS"/>
                 <outlet property="offenseMapView" destination="cxO-WG-ke4" id="fOv-bP-DYg"/>
+                <outlet property="secondBox" destination="UKm-lV-PtW" id="fqw-Sb-QQw"/>
+                <outlet property="thirdBox" destination="0XU-XV-Lr0" id="iav-0e-tYQ"/>
                 <outlet property="window" destination="QvC-M9-y7g" id="gIp-Ho-8D9"/>
             </connections>
         </customObject>
@@ -672,15 +673,15 @@
         </menu>
         <window title="CrimeFiles" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" animationBehavior="default" id="QvC-M9-y7g">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
-            <windowPositionMask key="initialPositionMask" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="365" y="147" width="824" height="636"/>
+            <windowPositionMask key="initialPositionMask" topStrut="YES" bottomStrut="YES"/>
+            <rect key="contentRect" x="163" y="50" width="1200" height="900"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1440" height="878"/>
             <view key="contentView" wantsLayer="YES" appearanceType="lightContent" id="EiT-Mj-1SZ">
-                <rect key="frame" x="0.0" y="0.0" width="824" height="636"/>
+                <rect key="frame" x="0.0" y="0.0" width="1200" height="900"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <button wantsLayer="YES" verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="X0j-h4-f0B">
-                        <rect key="frame" x="20" y="579" width="152" height="25"/>
+                    <button wantsLayer="YES" verticalHuggingPriority="750" id="X0j-h4-f0B">
+                        <rect key="frame" x="20" y="863" width="152" height="25"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="squareTextured" title="Load data from a file..." bezelStyle="texturedSquare" imagePosition="overlaps" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="VsX-HS-lc1">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -690,14 +691,9 @@
                             <action selector="openFileBrowser:" target="Voe-Tx-rLC" id="clV-Hb-CE9"/>
                         </connections>
                     </button>
-                    <mapView wantsLayer="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cxO-WG-ke4">
-                        <rect key="frame" x="35" y="191" width="442" height="368"/>
+                    <mapView wantsLayer="YES" id="cxO-WG-ke4">
+                        <rect key="frame" x="20" y="414" width="600" height="400"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <constraints>
-                            <constraint firstAttribute="height" constant="368" id="B5W-5O-xJl"/>
-                            <constraint firstAttribute="width" constant="442" id="ogk-Gr-ADj"/>
-                            <constraint firstAttribute="width" secondItem="cxO-WG-ke4" secondAttribute="height" multiplier="221:184" id="vcf-sq-wKM"/>
-                        </constraints>
                         <shadow key="shadow" blurRadius="1">
                             <color key="color" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </shadow>
@@ -705,45 +701,82 @@
                             <outlet property="delegate" destination="Voe-Tx-rLC" id="xre-ga-4wG"/>
                         </connections>
                     </mapView>
-                    <comboBox appearanceType="lightContent" verticalHuggingPriority="750" ambiguous="YES" misplaced="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hbN-gB-7bd">
-                        <rect key="frame" x="35" y="153" width="128" height="26"/>
+                    <splitView appearanceType="lightContent" dividerStyle="paneSplitter" vertical="YES" id="5FX-id-m6n">
+                        <rect key="frame" x="331" y="784" width="163" height="96"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <comboBoxCell key="cell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="justified" title="Select graph" usesSingleLineMode="YES" bezelStyle="round" completes="NO" numberOfVisibleItems="7" id="JMA-KI-1sf">
+                    </splitView>
+                    <comboBox identifier="firstBox" appearanceType="lightContent" verticalHuggingPriority="750" id="IfQ-7M-ZAQ">
+                        <rect key="frame" x="750" y="856" width="98" height="26"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <comboBoxCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" numberOfVisibleItems="8" id="d5J-Mc-dYi">
                             <font key="font" metaFont="system"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                             <objectValues>
                                 <string>month</string>
+                                <string>week</string>
+                                <string>shift</string>
                                 <string>weekDay</string>
                                 <string>offense</string>
                                 <string>method</string>
-                                <string>week</string>
-                                <string>shift</string>
                                 <string>district</string>
                             </objectValues>
-                            <connections>
-                                <outlet property="dataSource" destination="Voe-Tx-rLC" id="xSD-mo-0HQ"/>
-                            </connections>
                         </comboBoxCell>
                         <connections>
-                            <action selector="addGraph:" target="Voe-Tx-rLC" id="MXb-m6-bhI"/>
+                            <action selector="addGraph:" target="Voe-Tx-rLC" id="hMC-bf-cgX"/>
                         </connections>
                     </comboBox>
-                    <splitView appearanceType="lightContent" fixedFrame="YES" dividerStyle="paneSplitter" vertical="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5FX-id-m6n">
-                        <rect key="frame" x="331" y="520" width="163" height="96"/>
+                    <button appearanceType="lightContent" verticalHuggingPriority="750" id="ccu-O6-CU8">
+                        <rect key="frame" x="754" y="842" width="82" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    </splitView>
+                        <buttonCell key="cell" type="push" title="Button" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="o2R-wi-fmr">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                    </button>
+                    <comboBox identifier="secondBox" appearanceType="lightContent" verticalHuggingPriority="750" id="UKm-lV-PtW">
+                        <rect key="frame" x="750" y="556" width="99" height="26"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <comboBoxCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" completes="NO" numberOfVisibleItems="8" id="GfV-gh-fpv">
+                            <font key="font" metaFont="system"/>
+                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                            <objectValues>
+                                <string>month</string>
+                                <string>week</string>
+                                <string>shift</string>
+                                <string>weekDay</string>
+                                <string>offense</string>
+                                <string>method</string>
+                                <string>district</string>
+                            </objectValues>
+                        </comboBoxCell>
+                        <connections>
+                            <action selector="addGraph:" target="Voe-Tx-rLC" id="DSO-qU-Ml5"/>
+                        </connections>
+                    </comboBox>
+                    <comboBox identifier="thirdBox" appearanceType="lightContent" verticalHuggingPriority="750" id="0XU-XV-Lr0">
+                        <rect key="frame" x="750" y="256" width="99" height="26"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <comboBoxCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" numberOfVisibleItems="8" id="4RI-ch-a1y">
+                            <font key="font" metaFont="system"/>
+                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                            <objectValues>
+                                <string>month</string>
+                                <string>week</string>
+                                <string>shift</string>
+                                <string>weekDay</string>
+                                <string>offense</string>
+                                <string>method</string>
+                                <string>district</string>
+                            </objectValues>
+                        </comboBoxCell>
+                        <connections>
+                            <action selector="addGraph:" target="Voe-Tx-rLC" id="BEL-mO-lCq"/>
+                        </connections>
+                    </comboBox>
                 </subviews>
-                <constraints>
-                    <constraint firstItem="cxO-WG-ke4" firstAttribute="leading" secondItem="EiT-Mj-1SZ" secondAttribute="leading" constant="20" symbolic="YES" id="JAo-ue-h9s"/>
-                    <constraint firstAttribute="trailing" secondItem="cxO-WG-ke4" secondAttribute="trailing" constant="362" id="LlI-Um-mgA"/>
-                    <constraint firstAttribute="bottom" secondItem="cxO-WG-ke4" secondAttribute="bottom" constant="191" id="NQT-yh-4Hg"/>
-                    <constraint firstItem="hbN-gB-7bd" firstAttribute="top" secondItem="cxO-WG-ke4" secondAttribute="bottom" constant="14" id="Xwq-z4-Huv"/>
-                    <constraint firstItem="cxO-WG-ke4" firstAttribute="leading" secondItem="X0j-h4-f0B" secondAttribute="leading" id="adh-zC-SDZ"/>
-                    <constraint firstItem="cxO-WG-ke4" firstAttribute="top" secondItem="EiT-Mj-1SZ" secondAttribute="top" constant="77" id="oAj-UE-jZa"/>
-                    <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="cxO-WG-ke4" secondAttribute="trailing" constant="20" symbolic="YES" id="wV7-d5-2Cx"/>
-                    <constraint firstItem="cxO-WG-ke4" firstAttribute="top" secondItem="X0j-h4-f0B" secondAttribute="bottom" constant="13" id="xaP-jq-scu"/>
-                </constraints>
             </view>
         </window>
     </objects>

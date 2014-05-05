@@ -16,13 +16,20 @@
 @property CALayer* highlightLayer;
 @property NSMutableArray* layers;
 //@property int sum;
-@property NSDictionary* graphValues;
+@property NSMutableDictionary* graphValues;
+@property NSMutableDictionary* highlights;
 @property NSDictionary* colorMap;
 @property NSArray* sortedKeys;
 @property NSString* attr;
--(void) setValues:(NSDictionary*) dist forAttr:(NSString*)attr andColorMap:(NSDictionary*) colorMap;
 
 -(void) animate:(CAShapeLayer* )shape withWidth:(float) width;
 -(void) drawLayerContent;
+-(void) drawHighlights;
+-(id)initWithFrame:(NSRect)frame
+values:(NSMutableDictionary*)values name:(NSString*) name colorMap:(NSMutableDictionary*) colors;
 
+
+-(void) updateValues:(NSMutableDictionary*)values
+                name:(NSString*) name
+            colorMap:(NSMutableDictionary*) colors;
 @end

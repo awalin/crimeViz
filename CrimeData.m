@@ -9,6 +9,15 @@
 #import "CrimeData.h"
 
 @implementation CrimeData
+@synthesize crimeId;
+@synthesize  week;
+@synthesize  weekDay;
+@synthesize month;
+@synthesize reportDate;
+@synthesize offense;
+@synthesize method;
+@synthesize district;
+@synthesize shift;
 
 
 

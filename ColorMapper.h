@@ -12,4 +12,7 @@
 
 +(NSMutableDictionary*) colorMapping:(NSArray*)dataRows;
 
++(NSColor*)colorWithHexColorString:(NSString*)inColorString;
+
+
 @end

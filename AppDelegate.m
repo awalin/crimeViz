@@ -33,14 +33,36 @@
     NSMutableDictionary *dist = [[NSMutableDictionary alloc] init];
     [self setOffenseDist:dist];
     
-    NSDictionary *colors = [[NSDictionary alloc] init];
+    NSMutableDictionary *colors = [[NSMutableDictionary alloc] init];
     [self setColorMap:colors];
     
-    self.predicates = [[NSMutableArray alloc] init];
+    self.predicates = [[NSMutableDictionary alloc] init];
     
     //this is the array of all the crimes. Need to fix the data types.
     DataTable *aTable = [[DataTable alloc] init];
     [self setDataTable:aTable];
+    
+    NSMutableDictionary* graphs = [[NSMutableDictionary alloc] init];
+    [self setGraphViews: graphs];
+    
+    
+    NSURL* path = [[NSURL alloc] initWithString: @"file:///Users/asopan/Desktop/Test.txt"];
+
+        [self.fileReader setFilePath:path];
+        
+        [[self dataTable] setDataRows: [self.fileReader readDataFromFileAndCreateObject]];
+        
+        _dataOnView = [[NSMutableArray alloc] initWithArray:[[self dataTable] dataRows]];
+        
+        _offenseDist = [MetricsCalculator calculateHistogram:@"offense" fromRows:[[self dataTable] dataRows]];
+        
+        _keys = [_offenseDist allKeys];
+        _values =[_offenseDist allValues];
+        
+        [self setColorMap:[ColorMapper colorMapping:_keys]];
+        
+        [self updateUserInterface];
+        
     
     }
 
@@ -50,16 +72,6 @@
 }
 
 
--(id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex{
-
-    if([[aTableColumn identifier]  isEqual: @"OffenseType"]){
-        return [_keys objectAtIndex:rowIndex];
-    }
-    return [_values objectAtIndex:rowIndex];
-}
-
-
-
 - (IBAction)openFileBrowser:(id)sender {
     NSLog(@"received a open file browser message");
     
@@ -67,9 +79,13 @@
     //NSLog(@"fileChosen %d",ifFileChosen);
     NSLog(@"You have chosen the file %@", [self.fileBrowser filePath]);
     
-    if (ifFileChosen==1) {
+//    NSURL* path = [[NSURL alloc] initWithString: @"/Users/asopan/Desktop/Test.txt"];
+    
+    if (ifFileChosen==1)
+    {
         
         [self.fileReader setFilePath:[self.fileBrowser filePath]];
+//         [self.fileReader setFilePath:path];
         
         [sender removeFromSuperview];//remove the button
         
@@ -78,9 +94,6 @@
         _dataOnView = [[NSMutableArray alloc] initWithArray:[[self dataTable] dataRows]];
         
 //        NSLog(@"%@", _dataOnView);
-        
-        //TODO: pass the string to create the column names
-        [[self dataTable] createColumnHeaders];
        
         ////////Creating Table Data////////////////////
         _offenseDist = [MetricsCalculator calculateHistogram:@"offense" fromRows:[[self dataTable] dataRows]];
@@ -100,47 +113,66 @@
 
 
 
--(void) rowClicked:(NSString*)attr withValue:(NSString*) val{
+-(void) rowClicked:(NSString*)attrib withValue:(NSString*) val{
     
 //create / update predicate array//create NSCompound Predicate
-    NSPredicate *bPredicate = [NSPredicate predicateWithFormat:@"record.%@ like %@", attr, val];
+    NSPredicate *bPredicate = [NSPredicate predicateWithFormat:@"self.%@ like %@", attrib, val];
     
-    NSLog(@"%@", bPredicate);
+    NSLog(@"predicate= %@", bPredicate);
     
-    NSMutableArray *highlighted = (NSMutableArray*)[self mapCoordinates];
+    NSMutableArray *highlighted = [[NSMutableArray alloc] init] ;//(NSMutableArray*)[self mapCoordinates];
     
-  //  id pd = [NSString stringWithFormat:@"%@,%@",attr,val];
-
-    [[self predicates] addObject:bPredicate];
+    if(![[self predicates] objectForKey:attrib]){
+        [[self predicates] setObject:bPredicate forKey:attrib];
+    }
+    else{
+        NSPredicate* cmp = [NSCompoundPredicate orPredicateWithSubpredicates:[NSArray arrayWithObjects:bPredicate,
+                                                                                       [[self predicates] objectForKey:attrib],nil]];
+        [[self predicates] setObject:cmp forKey:attrib];
+    }
     
-//    NSLog(@"%@", [[self predicates] allKeys]);
+    NSMutableArray *viewRecords = (NSMutableArray*)[[self dataTable] dataRows];
+ 
+    for(id pkey in [[self predicates] allKeys]){
+        NSPredicate* aPredicate= [[self predicates] objectForKey:pkey];
+ 
+        NSLog(@"%@", aPredicate);
+        viewRecords = (NSMutableArray*)[viewRecords filteredArrayUsingPredicate:aPredicate];
     
-//    for(NSPredicate* aPredicate in [self predicates]){
+        NSLog(@"Inside %lu records are selected", (unsigned long)[viewRecords count]);
+    }
     
-    NSPredicate* aPredicate = bPredicate;
-//        NSLog(@"Predicate %@", aPredicate);
-        
-        highlighted = (NSMutableArray*)[highlighted filteredArrayUsingPredicate:aPredicate];
-        
-        NSLog(@"Inside %lu annotations are highlighted", (unsigned long)[highlighted count]);
-//    }
+    highlighted = (NSMutableArray*)[MetricsCalculator generateCoordinates:viewRecords forMapView:[self offenseMapView]];
     
-   
-    NSLog(@"%lu annotations are highlighted", (unsigned long)[highlighted count]);
-    //Now update the views
     
     [[self offenseMapView] removeAnnotations:[[self offenseMapView] annotations]];
-    
     [[self offenseMapView] addAnnotations:highlighted];
-
-
-}
-
-
-- (void)mapViewWillStartLoadingMap:(MKMapView *)mapView{
     
+    NSLog(@"Total graphs in window: %lu", [[self graphViews] count]);
+    
+    for(id key in [[self graphViews] allKeys]){
+        if([key isEqualToString:attrib]){
+            continue;
+        }else{
+        GraphView* gv = [[self graphViews] objectForKey:key];
+        NSLog(@"graph view for %@ ",  key);
+        
+        NSMutableDictionary *highlightValues = [MetricsCalculator calculateHistogram:key fromRows:viewRecords];
+
+        [gv setHighlights:highlightValues];
+    
+//       NSLog(@"graph view for %@, #of highlights %lu ",  [gv attr], [ [gv highlights] count]);
+//    [(GraphView*)[[self subViews] objectForKey:attr] drawHighlights];
+        
+            [gv drawHighlights];
+            
+            
+//            [gv setNeedsDisplay:YES];
+        }
+    }
 
 }
+
 
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id < MKAnnotation >)annotation {
 
@@ -198,62 +230,115 @@
 
 -(void) updateGraphView{
    
-    GraphView *gv = [[GraphView alloc] initWithFrame:NSMakeRect(500.0, 300.0, 300, 200)];
-    [[self subViews] setObject:gv forKey:@"offense"];
-    [gv setValues: [self offenseDist] forAttr:@"offense" andColorMap: _colorMap];
-    [gv setHidden: NO];
-    [self.window.contentView addSubview: gv];
-    [gv setNeedsDisplay:YES];
+    GraphView *gv = [[GraphView alloc]
+                     initWithFrame:NSMakeRect(750, 650.0, 350, 200)
+                                              values:[MetricsCalculator calculateHistogram:@"offense" fromRows:[[self dataTable] dataRows]]
+                                             name:@"offense"
+                                            colorMap: _colorMap];
+    
+    [self setFirstGraph:gv];
+    [[self graphViews] setObject:[self firstGraph] forKey:@"offense"];
+    [self.window.contentView addSubview: [self firstGraph]];
+    
+    
+    GraphView *gv2 = [[GraphView alloc]
+                      initWithFrame: NSMakeRect(750.0, 350.0, 350, 200)
+                                              values:[MetricsCalculator calculateHistogram:@"weekDay" fromRows:[[self dataTable] dataRows]]
+                                                name:@"weekDay"
+                                            colorMap: nil];
+    [self setSecondGraph:gv2];
+    [[self graphViews] setObject:[self secondGraph] forKey:@"weekDay"];
+    [self.window.contentView addSubview: [self secondGraph]];
+    
+   
+    
+    
+    GraphView *gv3 = [[GraphView alloc]
+                      initWithFrame:NSMakeRect(750.0, 50.0, 350, 200)
+                                              values:[MetricsCalculator calculateHistogram:@"district" fromRows:[[self dataTable] dataRows]]
+                                                name:@"district"
+                                            colorMap: nil];
+    [self setThirdGraph:gv3];
+    [[self graphViews] setObject:[self thirdGraph] forKey:@"district"];
+    [self.window.contentView addSubview: [self thirdGraph]];
+    
+
 }
 
 -(IBAction) addGraph:(id)sender{
-    
+    //Change it
     NSString* attr = (NSString*)[(NSComboBox*) sender objectValueOfSelectedItem];
-    NSLog(@"selected comboBox item %@", attr);
-    GraphView *gv = [[GraphView alloc] initWithFrame:NSMakeRect(500.0, 50.0, 300, 200)];
-    [[self subViews] setObject:gv forKey:attr];
-    [gv setValues:[MetricsCalculator calculateHistogram:attr fromRows:[[self dataTable] dataRows]] forAttr:attr andColorMap:nil];
-    [gv setHidden: NO];
-    [self.window.contentView addSubview: gv];
-    [gv setNeedsDisplay:YES];
+    NSLog(@"selected comboBox item: %@", attr);
+    NSMutableDictionary* colors = [[NSMutableDictionary alloc] init];
+    
+    if([attr isEqualToString:@"offense"]){
+        colors = _colorMap;
+    }else {
+        colors = nil;
+    }
+    
+    if( [[sender identifier] isEqualToString:@"firstBox"]){
+        //First remove the graph from the dictionary//
+        
+//        [self graphViews]
+//        [[self graphViews] removeObject:[self firstGraph] ];
+        
+
+        [[self firstGraph] updateValues:[MetricsCalculator calculateHistogram:attr fromRows:[[self dataTable] dataRows]]
+                                   name:attr
+                               colorMap:colors];
+        
+        [[self graphViews] setObject:[self firstGraph] forKey:attr];
+        [[self firstGraph] setNeedsDisplay:YES];
+        [[self firstGraph] drawLayerContent];
+        
+    } else if([[sender identifier] isEqualToString:@"secondBox"] ){
+        
+        [[self secondGraph] updateValues:[MetricsCalculator calculateHistogram:attr fromRows:[[self dataTable] dataRows]]
+                                   name:attr
+                               colorMap:colors];
+       
+        [[self graphViews] setObject:[self secondGraph] forKey:attr];
+        [[self secondGraph] setNeedsDisplay:YES];
+        [[self secondGraph] drawLayerContent];
+
+        
+    }else if([[sender identifier] isEqualToString:@"thirdBox"] ){
+        
+        
+        [[self thirdGraph] updateValues:[MetricsCalculator calculateHistogram:attr fromRows:[[self dataTable] dataRows]]
+                                   name:attr
+                               colorMap:colors];
+        
+        [[self graphViews] setObject:[self thirdGraph] forKey:attr];
+        [[self thirdGraph] setNeedsDisplay:YES];
+        [[self thirdGraph] drawLayerContent];
+
+        
+    }
+    
 }
 
 
 -(void) updateUserInterface {
     
-//    [[self offenseTable] setHidden:NO];
+   [self updateGraphView];
+   
+//    [[self graphPane] setHidden:NO];
+    [[self firstGraph] setNeedsDisplay:YES];
+    [[self secondGraph] setNeedsDisplay:YES];
+    [[self thirdGraph] setNeedsDisplay:YES];
+    
+    
+//    [[self graphPane] setNeedsDisplay:YES];
+    
     [[self offenseMapView] setHidden:NO];
-    [self updateGraphView];
+   
     [self updateMapView];
+    
     //TODO:show loading indication while the data structure is being populated
 }
 
-
-// This method is optional if you use bindings to provide the data
-- (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
-
-    
-    NSString *identifier = [tableColumn identifier];
-    
-    if ([identifier isEqualToString:@"OffenseType"]) {
-        NSTableCellView *cellView = [tableView makeViewWithIdentifier:identifier owner:self];
-//        // Then setup properties on the cellView based on the column
-        cellView.textField.stringValue = [_keys objectAtIndex:row];
-        return cellView;
-        
-    } else {
-//        NSLog(@"count column");
-        
-        
-        NSTableCellView *cellView = [tableView makeViewWithIdentifier:identifier owner:self];
-        //        // Then setup properties on the cellView based on the column
-        cellView.textField.stringValue = [_values objectAtIndex:row];
-        return cellView;
-
-    }
-    
-    return nil;
-}
 
 
 

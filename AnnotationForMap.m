@@ -34,7 +34,7 @@
 //        NSLog(@"formattedDateString: %@", formattedDateString);
         // Output for locale en_US: "formattedDateString: Jan 2, 2001".
 
-        subtitle = [NSString stringWithFormat:@"%@, %@day",  [rec reportDate], [rec weekDay]];
+        subtitle = [NSString stringWithFormat:@"%@, %@",  [rec reportDate], [rec weekDay]];
         
     }
     return self;

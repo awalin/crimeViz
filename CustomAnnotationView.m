@@ -33,7 +33,7 @@
     [thePath appendBezierPathWithOvalInRect:aRect];
     [thePath fill];
     
-    NSGradient* grad = [[NSGradient alloc] initWithColors:[NSArray arrayWithObjects: [NSColor whiteColor], [self color], nil]];
+    NSGradient* grad = [[NSGradient alloc] initWithColors:[NSArray arrayWithObjects: [self  color], [self color], nil]];
     
     //if selected, highlight the border..increase the size..
     [grad  drawInBezierPath:thePath relativeCenterPosition:NSMakePoint(0.0,0.0)];
@@ -77,7 +77,7 @@
         [textV insertText: [NSString stringWithFormat:@"at %@ district, %@, at %@",  [rec district], [rec method], [rec shift]]];
         [textV setFont:[NSFont fontWithName:@"Helvetica" size:8.0]];
         [textV setAlignment: NSLeftTextAlignment];
-        [textV setAlphaValue:0.3f];
+        [textV setAlphaValue:0.8f];
 
         
         [self setRightCalloutAccessoryView:textV];
@@ -88,23 +88,23 @@
 
 -(void) showCallout{
     
-   NSView* calvew = [[NSView alloc] initWithFrame: NSMakeRect(0,0,150, 100)];
-    
-    CALayer* callout = [CALayer layer];
-    [callout setBounds:CGRectMake(0,0,50, 30)];
-    [callout setOpacity:0.7];
-    [callout setBackgroundColor:[NSColor blueColor].CGColor];
-    CATextLayer* title = [CATextLayer layer];
-    title.string = [[self annotation] title];
-    [callout addSublayer:title];
-    
-    [calvew setWantsLayer:YES];
-    [calvew setLayer: callout];
-    
-//    [self setWantsLayer:YES];
-    [self addSubview:calvew];
-    
-//    [self setLeftCalloutAccessoryView:calvew];
+//    NSView* calvew = [[NSView alloc] initWithFrame: NSMakeRect(0,0,50, 30)];
+//    
+//    CALayer* callout = [CALayer layer];
+//    [callout setBounds:CGRectMake(0,0,50, 30)];
+//    [callout setOpacity:0.7];
+//    [callout setBackgroundColor:[NSColor blueColor].CGColor];
+//    CATextLayer* title = [CATextLayer layer];
+//    title.string = [[self annotation] title];
+//    [callout addSublayer:title];
+//    
+//    [calvew setWantsLayer:YES];
+//    [calvew setLayer: callout];
+//    
+////    [self setWantsLayer:YES];
+//    [self addSubview:calvew];
+//    
+////    [self setLeftCalloutAccessoryView:calvew];
     
     
 

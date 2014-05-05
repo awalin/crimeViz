@@ -11,18 +11,10 @@
 
 @implementation GraphView
 
--(void) setValues:(NSDictionary*) dist forAttr:(NSString*)attribute andColorMap:(NSDictionary*) colorMap{
-    [self setGraphValues: dist];
-    
+@synthesize  highlights;
+@synthesize attr;
 
-    NSArray* values = [_graphValues allValues];
-    [self setAttr: attribute];
-    [self setColorMap:colorMap];
-    [self setMax: (int)[values valueForKeyPath: @"@max.self"]];
 
-    [self drawLayerContent];
-//    [[self graphLayer] setNeedsDisplay];
-}
 
 -(void) drawRect:(NSRect)dirtyRect{
     
@@ -41,7 +33,89 @@
     NSLog(@"redraw");
     [self  drawLayerContent];
     
+    if([self highlights]){
+        [self drawHighlights];
+    }
+    
 
+}
+
+-(void) drawHighlights{
+    
+    if(![self highlights]){
+        NSLog(@"no highlights");
+        return;
+    } else {
+        
+        NSLog(@"total highlights in %@ graph, total: %lu", [self attr], [[self highlights] count]);
+        
+        //         CGColorRef colort = CGColorCreateGenericRGB(0.8, 0.8, 0.8, 0.5);
+        
+        float barDist = ([self frame].size.height-(3*[_graphValues count]))/[_graphValues count];
+        float start = [self layer].frame.size.height-barDist;
+        float width = [self frame].size.width*1.0 -80.0;
+        
+        
+        float barDistV = ([self frame].size.width-(3*[_graphValues count]))/[_graphValues count];
+        float startV = 0.0;//[self layer].frame.size.width-barDistV;
+        float height = [self frame].size.height*1.0 -40.0;
+        
+    
+        [self highlightLayer].sublayers=nil;
+        
+        for(id key in _sortedKeys){
+            
+            int val = (int)[[self highlights] objectForKey:key];
+            
+            
+            NSColor *color ;
+            if(![self colorMap]){
+                color = [NSColor blueColor];
+            }else{
+                color = [[self colorMap] objectForKey:key];
+            }
+            
+            CAShapeLayer *sublayer = [CAShapeLayer layer];
+            sublayer.backgroundColor = color.CGColor;
+            sublayer.cornerRadius = 0.5;
+            sublayer.anchorPoint = CGPointMake(0.0,0.0);
+
+            
+            if( ([[self attr] isEqual:@"month"]) || ([[self attr] isEqual:@"week"]) || ([[self attr] isEqual:@"weekDay"]) ){
+                
+                float eachHeight = (height/_max)*(1.0*val);
+                
+            //    NSLog(@"values %@: is %d, height %f\n", key, val, eachHeight);
+                
+          
+                [sublayer setPosition: CGPointMake(startV, 20.0)];
+                [sublayer setBounds:CGRectMake(startV, 20.0, barDistV, 1.0)];//initially, width is just 1.0, animates to the actual width
+                
+                [[self highlightLayer] addSublayer:sublayer];
+                [self animate:sublayer withHeight: eachHeight];
+                
+                
+                startV+= (barDistV+3);
+                
+            }else{
+                
+                float eachWidth = (width/_max)*(1.0*val);
+                
+                //            NSLog(@"values %@: is %d, height %f\n", key, val, eachWidth);
+
+                [sublayer setPosition: CGPointMake(80.0, start)];
+                [sublayer setBounds:CGRectMake(80.0, start, 1.0, barDist)];//initially, width is just 1.0, animates to the actual width
+
+                [[self highlightLayer] addSublayer:sublayer];
+                [self animate:sublayer withWidth: eachWidth];
+                
+                
+                start-= (barDist+3);
+            }
+            
+        }
+    }
+    
 }
 
 -(void) drawLayerContent{
@@ -51,16 +125,21 @@
         return;
     } else {
         
-        NSLog(@"total:max: %d", _max);
+        NSLog(@"drawing layers: max: %d", _max);
+        NSLog(@"height = %f",[self frame].size.height);
         
-//         CGColorRef colort = CGColorCreateGenericRGB(0.8, 0.8, 0.8, 0.5);
+        NSLog(@"width = %f",[self frame].size.width);
         
-        float barDist = ([self frame].size.height-(2*[_graphValues count]))/[_graphValues count];
+        [[self graphLayer] setSublayers:nil] ;
+        [[self highlightLayer] setSublayers:nil] ;
+
+    
+        float barDist = ([self frame].size.height-(3*[_graphValues count]))/[_graphValues count];
         float start = [self layer].frame.size.height-barDist;
         float width = [self frame].size.width*1.0 -80.0;
         
         
-        float barDistV = ([self frame].size.width-(2*[_graphValues count]))/[_graphValues count];
+        float barDistV = ([self frame].size.width-(3*[_graphValues count]))/[_graphValues count];
         float startV = 0.0;//[self layer].frame.size.width-barDistV;
         float height = [self frame].size.height*1.0 -40.0;
         
@@ -77,17 +156,15 @@
                 NSString *second = [_graphValues objectForKey:b];
                 return [first compare:second];
             }];
-            
         }
         
-        if([[_graphValues allKeys] containsObject:@"Fri"]){
+        if([[self attr] isEqualToString:@"weekDay"]){
             _sortedKeys = [NSArray arrayWithObjects:@"Mon",@"Tue",@"Wed",@"Thu",@"Fri",@"Sat",@"Sun",nil];
         }
   
         for(id key in _sortedKeys){
             int val = (int)[_graphValues objectForKey:key];
-            
-           
+  
             NSColor *color ;
             if(![self colorMap]){
                 color = [NSColor lightGrayColor];
@@ -95,36 +172,40 @@
                 color = [[self colorMap] objectForKey:key];
             }
             
+            CALayer *barLayer = [CALayer layer];
+            [barLayer setAnchorPoint : CGPointMake(0.0,0.0)];
+            
+            CATextLayer *label = [CATextLayer layer];
+            label.string = key;
+            
+            [label setFontSize:10.0];
+            [label setForegroundColor:[NSColor blackColor].CGColor];
+            label.anchorPoint = CGPointMake(0.0,0.0);
+            label.alignmentMode = kCAAlignmentRight;
+            
+            label.anchorPoint = CGPointMake(0.0,0.0);
+            label.alignmentMode = kCAAlignmentRight;
+            
+    
+            CAShapeLayer *sublayer = [CAShapeLayer layer];
+            sublayer.backgroundColor = color.CGColor;
+            sublayer.cornerRadius = 0.5;
+            
             
             if( ([[self attr] isEqual:@"month"]) || ([[self attr] isEqual:@"week"]) || ([[self attr] isEqual:@"weekDay"]) ){
 
                 float eachHeight = (height/_max)*(1.0*val);
-                
-                NSLog(@"values %@: is %d, height %f\n", key, val, eachHeight);
-                
-                CALayer *barLayer = [CALayer layer];
-                [barLayer setAnchorPoint : CGPointMake(0.0,0.0)];
+               
                 [barLayer setPosition:CGPointMake(startV, 0.0)];
                 [barLayer setBounds:CGRectMake(startV, 0.0, barDistV,[self frame].size.height)];
                 
-                
-                CATextLayer *label = [CATextLayer layer];
-                label.string = key;
-                label.position = CGPointMake(startV, 0.0);
-                [label setFontSize:10.0];
-                [label setForegroundColor:[NSColor blackColor].CGColor];
-//                [label setBackgroundColor:colort];
-                label.anchorPoint = CGPointMake(0.0,0.0);
-                label.alignmentMode = kCAAlignmentRight;
                 label.geometryFlipped=YES;
+                label.position = CGPointMake(startV, 0.0);
                 [label setBounds:CGRectMake(startV, 0.0, barDistV, 20.0)];
+                
                 
                 [barLayer addSublayer:label];
                 
-                
-                CAShapeLayer *sublayer = [CAShapeLayer layer];
-                sublayer.backgroundColor = color.CGColor;
-                sublayer.cornerRadius = 2.0;
                 sublayer.anchorPoint = CGPointMake(0.0,0.0);
                 [sublayer setPosition: CGPointMake(startV, 20.0)];
                 [sublayer setBounds:CGRectMake(startV, 20.0, barDistV, 1.0)];//initially, width is just 1.0, animates to the actual width
@@ -136,38 +217,25 @@
                 [self animate:sublayer withHeight: eachHeight];
                 
                 
-                startV+= (barDistV+2);
+                startV+= (barDistV+3);
 
             }else{
                 
             float eachWidth = (width/_max)*(1.0*val);
                 
-//            NSLog(@"values %@: is %d, height %f\n", key, val, eachWidth);
+            NSLog(@"values %@: is %d, height %f\n", key, val, eachWidth);
             
-            CALayer *barLayer = [CALayer layer];
-            [barLayer setAnchorPoint : CGPointMake(0.0,0.0)];
             [barLayer setPosition:CGPointMake(0.0, start)];
             [barLayer setBounds:CGRectMake(0.0, start, [self frame].size.width, barDist)];
             
-            
-            CATextLayer *label = [CATextLayer layer];
-            label.string = key;
             label.position = CGPointMake(0.0, start);
-            [label setFontSize:10.0];
-//            [label setForegroundColor:color.CGColor];
-            
-            [label setForegroundColor:[NSColor blackColor].CGColor];
-//            [label setBackgroundColor:colort];
-            label.anchorPoint = CGPointMake(0.0,0.0);
-            label.alignmentMode = kCAAlignmentRight;
+
+           
             [label setBounds:CGRectMake(0.0, start, 76.0, barDist)];
             
             [barLayer addSublayer:label];
         
-            
-            CAShapeLayer *sublayer = [CAShapeLayer layer];
-            sublayer.backgroundColor = color.CGColor;
-            sublayer.cornerRadius = 2.0;
+ 
             sublayer.anchorPoint = CGPointMake(0.0,0.0);
             [sublayer setPosition: CGPointMake(80.0, start)];
             [sublayer setBounds:CGRectMake(80.0, start, 1.0, barDist)];//initially, width is just 1.0, animates to the actual width
@@ -178,7 +246,7 @@
             [self animate:sublayer withWidth: eachWidth];
             
             
-            start-= (barDist+2);
+            start-= (barDist+3);
             }
             
         }
@@ -186,7 +254,10 @@
 
 }
 
-- (id)initWithFrame:(NSRect)frame
+- (id) initWithFrame:(NSRect)frame
+             values:(NSMutableDictionary*)values
+               name:(NSString*) name
+           colorMap:(NSMutableDictionary*) colors
 {
     self = [super initWithFrame:frame];
     if (self) {
@@ -220,7 +291,7 @@
         
         
 //        [[self highlightLayer] setBackgroundColor:color];
-        [[self highlightLayer] setOpacity:0.0];
+        [[self highlightLayer] setOpacity:1.0];
         
         [[self highlightLayer] setBounds:CGRectMake(0.0, 0.0, [self frame].size.width, [self frame].size.height )];
         
@@ -230,10 +301,20 @@
                                                     self.frame.size.height/2)];
         
         
-        
         [[self layer] addSublayer:[self highlightLayer]];//add the graph layer as a sublayer to the defualt layer of this view
         
-        _max = 0;
+        
+        
+        [self setGraphValues: values];
+ 
+        NSArray* values = [_graphValues allValues];
+        [self setAttr: name];
+        [self setColorMap:colors];
+        [self setMax: (int)[values valueForKeyPath: @"@max.self"]];
+//        NSLog(@"graph name:  %@", [self attr]);
+        
+        [self drawLayerContent];
+
         
     
   }
@@ -310,6 +391,26 @@
 
 - (BOOL)acceptsFirstResponder {
     return YES;
+}
+
+
+-(void) updateValues:(NSMutableDictionary*)values
+               name:(NSString*) name
+            colorMap:(NSMutableDictionary*) colors{
+    
+    
+    [self setGraphValues: values];
+    
+    NSArray* val = [_graphValues allValues];
+    [self setAttr: name];
+    [self setColorMap:colors];
+    [self setMax: (int)[val valueForKeyPath: @"@max.self"]];
+    //        NSLog(@"graph name:  %@", [self attr]);
+
+    
+    
+
+
 }
 
 - (void)mouseDown:(NSEvent *)event {

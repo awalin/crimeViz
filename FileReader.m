@@ -16,17 +16,17 @@
     NSURL *URL = self.filePath;
     
     NSLog(@"Reading the file %@", _filePath);
-//    NSError *error;
-//    NSString *stringFromFileAtURL = [[NSString alloc]
-//                                     initWithContentsOfURL:_filePath
-//                                     encoding:NSUTF8StringEncoding
-//                                     error:&error];
-//    if (stringFromFileAtURL == nil) {
-//        // an error occurred
-//        NSLog(@"Error reading file at %@\n%@",
-//              _filePath, [error localizedFailureReason]);
-//        // implementation continues ...
-//    }
+    NSError *error;
+    NSString *stringFromFileAtURL = [[NSString alloc]
+                                     initWithContentsOfURL:_filePath
+                                     encoding:NSUTF8StringEncoding
+                                     error:&error];
+    if (stringFromFileAtURL == nil) {
+        // an error occurred
+        NSLog(@"Error reading file at %@\n%@",
+              _filePath, [error localizedFailureReason]);
+        // implementation continues ...
+    }
     
     
     //pull the content from the file into memory
