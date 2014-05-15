@@ -18,6 +18,7 @@
 #import "CustomCellView.h"
 #import "WeekDayView.h"
 #import "CrimeData.h"
+#import "GraphPaneView.h"
 
 @implementation AppDelegate
 
@@ -41,9 +42,10 @@
     //this is the array of all the crimes. Need to fix the data types.
     DataTable *aTable = [[DataTable alloc] init];
     [self setDataTable:aTable];
+    [[self dataTable] createColumnHeaders];
     
-    NSMutableDictionary* graphs = [[NSMutableDictionary alloc] init];
-    [self setGraphViews: graphs];
+//    NSMutableDictionary* graphs = [[NSMutableDictionary alloc] init];
+//    [self setGraphViews: graphs];
     
     
     NSURL* path = [[NSURL alloc] initWithString: @"file:///Users/asopan/Desktop/Test.txt"];
@@ -62,8 +64,7 @@
         [self setColorMap:[ColorMapper colorMapping:_keys]];
         
         [self updateUserInterface];
-        
-    
+
     }
 
 -(NSInteger)numberOfRowsInTableView: (NSTableView *) aTableView{
@@ -113,30 +114,21 @@
 
 
 
--(void) rowClicked:(NSString*)attrib withValue:(NSString*) val{
+-(void) rowClicked:(NSString*)attrib withValues:(NSPredicate*) valPredicate{
     
-//create / update predicate array//create NSCompound Predicate
-    NSPredicate *bPredicate = [NSPredicate predicateWithFormat:@"self.%@ like %@", attrib, val];
     
-    NSLog(@"predicate= %@", bPredicate);
+    NSLog(@"value of predicate= %@", valPredicate);
     
     NSMutableArray *highlighted = [[NSMutableArray alloc] init] ;//(NSMutableArray*)[self mapCoordinates];
-    
-    if(![[self predicates] objectForKey:attrib]){
-        [[self predicates] setObject:bPredicate forKey:attrib];
-    }
-    else{
-        NSPredicate* cmp = [NSCompoundPredicate orPredicateWithSubpredicates:[NSArray arrayWithObjects:bPredicate,
-                                                                                       [[self predicates] objectForKey:attrib],nil]];
-        [[self predicates] setObject:cmp forKey:attrib];
-    }
+
+    [[self predicates] setObject:valPredicate forKey:attrib];
     
     NSMutableArray *viewRecords = (NSMutableArray*)[[self dataTable] dataRows];
  
     for(id pkey in [[self predicates] allKeys]){
         NSPredicate* aPredicate= [[self predicates] objectForKey:pkey];
  
-        NSLog(@"%@", aPredicate);
+        NSLog(@"predicate in app delegate %@", aPredicate);
         viewRecords = (NSMutableArray*)[viewRecords filteredArrayUsingPredicate:aPredicate];
     
         NSLog(@"Inside %lu records are selected", (unsigned long)[viewRecords count]);
@@ -148,28 +140,22 @@
     [[self offenseMapView] removeAnnotations:[[self offenseMapView] annotations]];
     [[self offenseMapView] addAnnotations:highlighted];
     
-    NSLog(@"Total graphs in window: %lu", [[self graphViews] count]);
+    NSLog(@"Total graphs in window: %lu", [self.graphs.graphs count]);
     
-    for(id key in [[self graphViews] allKeys]){
-        if([key isEqualToString:attrib]){
-            continue;
-        }else{
-        GraphView* gv = [[self graphViews] objectForKey:key];
-        NSLog(@"graph view for %@ ",  key);
+    for(id key in [self.graphs.graphs allKeys]){
+     
+    
+        GraphView* gv = [self.graphs.graphs objectForKey:key];
+        NSLog(@"graph view for %@ ", key);
         
         NSMutableDictionary *highlightValues = [MetricsCalculator calculateHistogram:key fromRows:viewRecords];
 
         [gv setHighlights:highlightValues];
-    
-//       NSLog(@"graph view for %@, #of highlights %lu ",  [gv attr], [ [gv highlights] count]);
-//    [(GraphView*)[[self subViews] objectForKey:attr] drawHighlights];
         
-            [gv drawHighlights];
+        [gv drawHighlights];
             
-            
-//            [gv setNeedsDisplay:YES];
+//        [gv setNeedsDisplay:YES];
         }
-    }
 
 }
 
@@ -228,45 +214,143 @@
 //    NSLog(@"added annotation to map");
 }
 
+
 -(void) updateGraphView{
+    
+    
+    self.graphs = [ [GraphPaneView alloc] initWithFrame:NSMakeRect(600.0, 50.0, 350.0, 750.0)];
    
     GraphView *gv = [[GraphView alloc]
-                     initWithFrame:NSMakeRect(750, 650.0, 350, 200)
+                     initWithFrame:NSMakeRect(10.0, 10.0, 350, 200)
                                               values:[MetricsCalculator calculateHistogram:@"offense" fromRows:[[self dataTable] dataRows]]
                                              name:@"offense"
                                             colorMap: _colorMap];
     
-    [self setFirstGraph:gv];
-    [[self graphViews] setObject:[self firstGraph] forKey:@"offense"];
-    [self.window.contentView addSubview: [self firstGraph]];
+     [self.graphs addGraph:gv];
     
+    NSComboBox* cb1 = [[NSComboBox alloc] initWithFrame: NSMakeRect(10.0, 210.0, 100.0, 25.0)];
+    [cb1 setIdentifier:@"first"];
+    [cb1 addItemsWithObjectValues:[[self dataTable] columnHeaders]];
+    [cb1 setNumberOfVisibleItems:4];
+    [cb1 selectItemAtIndex:0];
+    [cb1 selectItemWithObjectValue:@"offense"];
+    
+    [cb1 setTarget:self];
+
+    [cb1 setAction:@selector(addGraph:)];
+    
+//    NSLog(@"%@", [cb1 itemObjectValueAtIndex:0]);
+    [self.graphs addCombo:cb1 forKey:@"offenseC"];
+    
+
     
     GraphView *gv2 = [[GraphView alloc]
-                      initWithFrame: NSMakeRect(750.0, 350.0, 350, 200)
+                      initWithFrame: NSMakeRect(10.0, 250.0, 350, 200)
                                               values:[MetricsCalculator calculateHistogram:@"weekDay" fromRows:[[self dataTable] dataRows]]
                                                 name:@"weekDay"
                                             colorMap: nil];
-    [self setSecondGraph:gv2];
-    [[self graphViews] setObject:[self secondGraph] forKey:@"weekDay"];
-    [self.window.contentView addSubview: [self secondGraph]];
     
-   
-    
-    
-    GraphView *gv3 = [[GraphView alloc]
-                      initWithFrame:NSMakeRect(750.0, 50.0, 350, 200)
+     [self.graphs addGraph:gv2];
+    NSComboBox* cb2 = [[NSComboBox alloc] initWithFrame: NSMakeRect(10.0, 450.0, 100.0, 25.0)];
+    [cb2 setIdentifier:@"second"];
+    [cb2 addItemsWithObjectValues:[[self dataTable] columnHeaders]];
+    [cb2 setNumberOfVisibleItems:4];
+    [cb2 selectItemWithObjectValue:@"weekDay"];
+//    NSLog(@"%@", [cb2 itemObjectValueAtIndex:0]);
+    [self.graphs addCombo:cb2 forKey:@"weekDayC"];
+  
+     GraphView *gv3 = [[GraphView alloc]
+                      initWithFrame:NSMakeRect(10.0, 500.0, 350, 200)
                                               values:[MetricsCalculator calculateHistogram:@"district" fromRows:[[self dataTable] dataRows]]
                                                 name:@"district"
                                             colorMap: nil];
-    [self setThirdGraph:gv3];
-    [[self graphViews] setObject:[self thirdGraph] forKey:@"district"];
-    [self.window.contentView addSubview: [self thirdGraph]];
+    
+     [self.graphs addGraph:gv3];
+    
+    NSPopUpButton* pop1 = [[NSPopUpButton alloc] initWithFrame:NSMakeRect(250.0, 700.0, 100.0, 25.0) pullsDown:YES];
+    [pop1 setTitle:@"settings"];
+    [pop1 addItemsWithTitles:[NSArray arrayWithObjects:@"settings",@"colorize", @"vertical",nil ]];
+    
+    [pop1 setTarget:self];
+    [pop1 setAction:@selector(changeSettings:)];
+    [pop1 setIdentifier:@"pop3"];
+    [self.graphs addSubview:pop1];
+
+    
+    NSComboBox* cb3 = [[NSComboBox alloc] initWithFrame: NSMakeRect(10.0, 700.0, 100.0, 25.0)];
+    [cb3 setIdentifier:@"third"];
+    [cb3 addItemsWithObjectValues:[[self dataTable] columnHeaders]];
+    [cb3 setNumberOfVisibleItems:4];
+    NSLog(@"%@", [cb3 itemObjectValueAtIndex:0]);
+    [cb3 selectItemWithObjectValue:@"district"];
+    [self.graphs addCombo:cb3 forKey:@"districtC"];
+
+    //
+    // the scroll view should have both horizontal and vertical scrollers
+    [self.scroll setHasVerticalScroller:YES];
+    [self.scroll setHasHorizontalScroller:YES];
+    // set the autoresizing mask so that the scroll view will
+    // resize with the window
+    [self.scroll setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+    
+    // configure the scroller to have no visible border
+    [self.scroll setBorderType:NSNoBorder];
+    
+    [[self scroll] setDocumentView:[self graphs]];
+    
+    [[self scroll] setNeedsDisplay:YES];
+  
+
+}
+
+-(void) changeSettings:(id) sender{
+    NSLog(@"selected settings");
+    //Change it
+    NSString* attr = (NSString*)[(NSPopUpButton*) sender titleOfSelectedItem];
+    NSLog(@"selected settings item: %@", attr);
+    if( [[sender identifier] isEqualToString:@"pop3"] ){
+        NSLog(@"pop3 selected");
+        
+        NSMutableDictionary* colors = [[NSMutableDictionary alloc] init];
+        GraphView* gv=(GraphView*)self.graphs.subviews[4];
+        NSString* atrkey = [gv attr];
+        
+        if([attr isEqualToString:@"colorize"]){
+            
+           _colorMap = [ColorMapper colorMapping:[[gv graphValues] allKeys]];
+            colors = _colorMap;
+            [[self offenseMapView] showAnnotations: [[self offenseMapView] annotations] animated:YES];
+
+     
+        }else {
+            colors = nil;
+        }
+        
+        
+      
+        
+        [gv updateValues:[MetricsCalculator calculateHistogram:atrkey fromRows:[[self dataTable] dataRows]]
+                    name:atrkey
+                colorMap:colors];
+        
+        if([attr isEqualToString:@"vertical"]){
+            [gv setHorizontal:NO];
+        }
+        
+        [self.graphs.graphs setObject:gv forKey:attr];
+        [gv setNeedsDisplay:YES];
+        [gv drawLayerContent];
+        
+    }
+    
+    
     
 
 }
 
--(IBAction) addGraph:(id)sender{
-    //Change it
+-(IBAction) addGraph:(NSComboBoxCell*) sender{
+    NSLog(@"selected comboBox ");
+//    //Change it
     NSString* attr = (NSString*)[(NSComboBox*) sender objectValueOfSelectedItem];
     NSLog(@"selected comboBox item: %@", attr);
     NSMutableDictionary* colors = [[NSMutableDictionary alloc] init];
@@ -277,43 +361,43 @@
         colors = nil;
     }
     
-    if( [[sender identifier] isEqualToString:@"firstBox"]){
-        //First remove the graph from the dictionary//
+    if( [[sender identifier] isEqualToString:@"first"]){
         
-//        [self graphViews]
-//        [[self graphViews] removeObject:[self firstGraph] ];
-        
+        GraphView* gv=(GraphView*)self.graphs.subviews[0];
 
-        [[self firstGraph] updateValues:[MetricsCalculator calculateHistogram:attr fromRows:[[self dataTable] dataRows]]
+        [gv updateValues:[MetricsCalculator calculateHistogram:attr fromRows:[[self dataTable] dataRows]]
                                    name:attr
                                colorMap:colors];
         
-        [[self graphViews] setObject:[self firstGraph] forKey:attr];
-        [[self firstGraph] setNeedsDisplay:YES];
-        [[self firstGraph] drawLayerContent];
+        [self.graphs.graphs setObject:gv forKey:attr];
+        [gv setNeedsDisplay:YES];
+        [gv drawLayerContent];
         
-    } else if([[sender identifier] isEqualToString:@"secondBox"] ){
+    } else if([[sender identifier] isEqualToString:@"second"] ){
         
-        [[self secondGraph] updateValues:[MetricsCalculator calculateHistogram:attr fromRows:[[self dataTable] dataRows]]
-                                   name:attr
-                               colorMap:colors];
-       
-        [[self graphViews] setObject:[self secondGraph] forKey:attr];
-        [[self secondGraph] setNeedsDisplay:YES];
-        [[self secondGraph] drawLayerContent];
+          GraphView* gv=(GraphView*)self.graphs.subviews[1];
+         
+         [gv updateValues:[MetricsCalculator calculateHistogram:attr fromRows:[[self dataTable] dataRows]]
+                     name:attr
+                 colorMap:colors];
+         
+         [self.graphs.graphs setObject:gv forKey:attr];
+         [gv setNeedsDisplay:YES];
+         [gv drawLayerContent];
 
         
-    }else if([[sender identifier] isEqualToString:@"thirdBox"] ){
+    }else if([[sender identifier] isEqualToString:@"third"] ){
         
         
-        [[self thirdGraph] updateValues:[MetricsCalculator calculateHistogram:attr fromRows:[[self dataTable] dataRows]]
-                                   name:attr
-                               colorMap:colors];
+        GraphView* gv=(GraphView*)self.graphs.subviews[2];
         
-        [[self graphViews] setObject:[self thirdGraph] forKey:attr];
-        [[self thirdGraph] setNeedsDisplay:YES];
-        [[self thirdGraph] drawLayerContent];
-
+        [gv updateValues:[MetricsCalculator calculateHistogram:attr fromRows:[[self dataTable] dataRows]]
+                    name:attr
+                colorMap:colors];
+        
+        [self.graphs.graphs setObject:gv forKey:attr];
+        [gv setNeedsDisplay:YES];
+        [gv drawLayerContent];
         
     }
     
@@ -325,13 +409,9 @@
    [self updateGraphView];
    
 //    [[self graphPane] setHidden:NO];
-    [[self firstGraph] setNeedsDisplay:YES];
-    [[self secondGraph] setNeedsDisplay:YES];
-    [[self thirdGraph] setNeedsDisplay:YES];
     
-    
-//    [[self graphPane] setNeedsDisplay:YES];
-    
+    [(GraphView*)self.graphs setNeedsDisplay:YES];
+
     [[self offenseMapView] setHidden:NO];
    
     [self updateMapView];

@@ -14,21 +14,15 @@
 -(void) createColumnHeaders {
     //should be created through File reading
     //TODO: create a dictionary of column names, read the first line of the file
-//    
-//    _columnHeaders = @{
-//                     @"CrimeId":[NSNumber numberWithInt:0],
-//                     //                     @"CrimeDate": [NSNumber numberWithInt:13],
-//                     @"ReportMonth": [NSNumber numberWithInt:2],
-//                     //                     @"":[NSNumber numberWithInt:13],
-//                     @"Lattitude":[NSNumber numberWithInt:9],
-//                     @"Longitude":[NSNumber numberWithInt:10],
-//                     };
-    
+
     
     _columnHeaders = [[NSArray alloc] initWithObjects:
-                         @"offense"
+                         @"offense",
                          @"month",
                          @"week",
+                        @"district",
+                        @"weekDay",
+                        @"severity",
                          nil];
 
     

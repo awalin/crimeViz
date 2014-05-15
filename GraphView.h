@@ -9,18 +9,22 @@
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/QuartzCore.h>
 @class AppDelegate;
+@class ColorMapper;
 
 @interface GraphView : NSView
 @property int max;
+@property BOOL horizontal;
 @property CALayer* graphLayer;
 @property CALayer* highlightLayer;
 @property NSMutableArray* layers;
-//@property int sum;
+@property NSMutableArray* selectedRows;
 @property NSMutableDictionary* graphValues;
 @property NSMutableDictionary* highlights;
 @property NSDictionary* colorMap;
 @property NSArray* sortedKeys;
 @property NSString* attr;
+@property long pressed;
+@property BOOL ctrlOn;
 
 -(void) animate:(CAShapeLayer* )shape withWidth:(float) width;
 -(void) drawLayerContent;

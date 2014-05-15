@@ -14,10 +14,8 @@
         <customObject id="-3" userLabel="Application"/>
         <customObject id="Voe-Tx-rLC" customClass="AppDelegate">
             <connections>
-                <outlet property="firstBox" destination="IfQ-7M-ZAQ" id="Pci-gY-GbS"/>
-                <outlet property="offenseMapView" destination="cxO-WG-ke4" id="fOv-bP-DYg"/>
-                <outlet property="secondBox" destination="UKm-lV-PtW" id="fqw-Sb-QQw"/>
-                <outlet property="thirdBox" destination="0XU-XV-Lr0" id="iav-0e-tYQ"/>
+                <outlet property="offenseMapView" destination="KgN-dz-FRj" id="kfs-eX-ub1"/>
+                <outlet property="scroll" destination="j7u-3R-rJV" id="32e-yW-Xl9"/>
                 <outlet property="window" destination="QvC-M9-y7g" id="gIp-Ho-8D9"/>
             </connections>
         </customObject>
@@ -674,15 +672,16 @@
         <window title="CrimeFiles" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" animationBehavior="default" id="QvC-M9-y7g">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="163" y="50" width="1200" height="900"/>
+            <rect key="contentRect" x="163" y="50" width="1200" height="800"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1440" height="878"/>
+            <value key="minSize" type="size" width="800" height="600"/>
             <view key="contentView" wantsLayer="YES" appearanceType="lightContent" id="EiT-Mj-1SZ">
-                <rect key="frame" x="0.0" y="0.0" width="1200" height="900"/>
+                <rect key="frame" x="0.0" y="0.0" width="1200" height="800"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <button wantsLayer="YES" verticalHuggingPriority="750" id="X0j-h4-f0B">
-                        <rect key="frame" x="20" y="863" width="152" height="25"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <rect key="frame" x="29" y="654" width="152" height="25"/>
+                        <autoresizingMask key="autoresizingMask"/>
                         <buttonCell key="cell" type="squareTextured" title="Load data from a file..." bezelStyle="texturedSquare" imagePosition="overlaps" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="VsX-HS-lc1">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -691,91 +690,35 @@
                             <action selector="openFileBrowser:" target="Voe-Tx-rLC" id="clV-Hb-CE9"/>
                         </connections>
                     </button>
-                    <mapView wantsLayer="YES" id="cxO-WG-ke4">
-                        <rect key="frame" x="20" y="414" width="600" height="400"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <shadow key="shadow" blurRadius="1">
-                            <color key="color" name="controlColor" catalog="System" colorSpace="catalog"/>
-                        </shadow>
+                    <mapView canDrawConcurrently="YES" appearanceType="lightContent" id="KgN-dz-FRj">
+                        <rect key="frame" x="124" y="193" width="500" height="376"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxX="YES" heightSizable="YES"/>
                         <connections>
-                            <outlet property="delegate" destination="Voe-Tx-rLC" id="xre-ga-4wG"/>
+                            <outlet property="delegate" destination="Voe-Tx-rLC" id="fmY-wG-L9y"/>
                         </connections>
                     </mapView>
-                    <splitView appearanceType="lightContent" dividerStyle="paneSplitter" vertical="YES" id="5FX-id-m6n">
-                        <rect key="frame" x="331" y="784" width="163" height="96"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    </splitView>
-                    <comboBox identifier="firstBox" appearanceType="lightContent" verticalHuggingPriority="750" id="IfQ-7M-ZAQ">
-                        <rect key="frame" x="750" y="856" width="98" height="26"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <comboBoxCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" numberOfVisibleItems="8" id="d5J-Mc-dYi">
-                            <font key="font" metaFont="system"/>
-                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                            <objectValues>
-                                <string>month</string>
-                                <string>week</string>
-                                <string>shift</string>
-                                <string>weekDay</string>
-                                <string>offense</string>
-                                <string>method</string>
-                                <string>district</string>
-                            </objectValues>
-                        </comboBoxCell>
-                        <connections>
-                            <action selector="addGraph:" target="Voe-Tx-rLC" id="hMC-bf-cgX"/>
-                        </connections>
-                    </comboBox>
-                    <button appearanceType="lightContent" verticalHuggingPriority="750" id="ccu-O6-CU8">
-                        <rect key="frame" x="754" y="842" width="82" height="32"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <buttonCell key="cell" type="push" title="Button" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="o2R-wi-fmr">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                        </buttonCell>
-                    </button>
-                    <comboBox identifier="secondBox" appearanceType="lightContent" verticalHuggingPriority="750" id="UKm-lV-PtW">
-                        <rect key="frame" x="750" y="556" width="99" height="26"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <comboBoxCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" completes="NO" numberOfVisibleItems="8" id="GfV-gh-fpv">
-                            <font key="font" metaFont="system"/>
-                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                            <objectValues>
-                                <string>month</string>
-                                <string>week</string>
-                                <string>shift</string>
-                                <string>weekDay</string>
-                                <string>offense</string>
-                                <string>method</string>
-                                <string>district</string>
-                            </objectValues>
-                        </comboBoxCell>
-                        <connections>
-                            <action selector="addGraph:" target="Voe-Tx-rLC" id="DSO-qU-Ml5"/>
-                        </connections>
-                    </comboBox>
-                    <comboBox identifier="thirdBox" appearanceType="lightContent" verticalHuggingPriority="750" id="0XU-XV-Lr0">
-                        <rect key="frame" x="750" y="256" width="99" height="26"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <comboBoxCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" numberOfVisibleItems="8" id="4RI-ch-a1y">
-                            <font key="font" metaFont="system"/>
-                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                            <objectValues>
-                                <string>month</string>
-                                <string>week</string>
-                                <string>shift</string>
-                                <string>weekDay</string>
-                                <string>offense</string>
-                                <string>method</string>
-                                <string>district</string>
-                            </objectValues>
-                        </comboBoxCell>
-                        <connections>
-                            <action selector="addGraph:" target="Voe-Tx-rLC" id="BEL-mO-lCq"/>
-                        </connections>
-                    </comboBox>
+                    <scrollView wantsLayer="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" usesPredominantAxisScrolling="NO" scrollerKnobStyle="dark" id="j7u-3R-rJV">
+                        <rect key="frame" x="663" y="14" width="350" height="750"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" heightSizable="YES"/>
+                        <clipView key="contentView" id="dHf-FQ-CHr">
+                            <rect key="frame" x="1" y="1" width="348" height="748"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <subviews>
+                                <customView appearanceType="lightContent" id="Lce-z6-mDi" customClass="GraphPaneView">
+                                    <rect key="frame" x="0.0" y="0.0" width="278" height="511"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                </customView>
+                            </subviews>
+                        </clipView>
+                        <scroller key="horizontalScroller" verticalHuggingPriority="750" horizontal="YES" id="w3H-eA-1mQ">
+                            <rect key="frame" x="1" y="733" width="348" height="16"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </scroller>
+                        <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="OQt-Jz-tEa">
+                            <rect key="frame" x="333" y="1" width="16" height="748"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </scroller>
+                    </scrollView>
                 </subviews>
             </view>
         </window>
