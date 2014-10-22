@@ -42,10 +42,8 @@
     
     NSMutableArray *crimeData = [[NSMutableArray alloc] init];
     
-    
-    //start  showing progress bar here, sends message to the controller//
-    
-    //parse the line and create the objects
+ //start  showing progress bar here, sends message to the controller//
+ //parse the line and create the objects
     for(int i=2; i<[items count]; i++){ // skip the first two lines of the file, so i = 2//
 //        NSLog(@"%d, %@",i,[items objectAtIndex:i]);
         NSString* strsInOneLine = [items objectAtIndex:i];

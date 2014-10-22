@@ -200,9 +200,6 @@
             label.anchorPoint = CGPointMake(0.0,0.0);
             label.alignmentMode = kCAAlignmentRight;
             
-            label.anchorPoint = CGPointMake(0.0,0.0);
-            label.alignmentMode = kCAAlignmentRight;
-            
     
             CAShapeLayer *sublayer = [CAShapeLayer layer];
             sublayer.backgroundColor = color.CGColor;

@@ -10,7 +10,9 @@
 @class CrimeData;
 
 @interface FileReader : NSObject
+
 @property NSURL *filePath;
+
 -(id) readDataFromFileAndCreateObject;
 
 @end
